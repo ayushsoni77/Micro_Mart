@@ -1,0 +1,250 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tour Modal Styles - Ensure proper positioning and clickability */
+.tour-modal {
+  position: fixed !important;
+  z-index: 9999 !important;
+  pointer-events: auto !important;
+}
+
+.tour-modal * {
+  pointer-events: auto !important;
+}
+
+.tour-overlay {
+  position: fixed !important;
+  z-index: 9998 !important;
+  pointer-events: auto !important;
+}
+
+/* Ensure buttons in tour modals are always clickable */
+.tour-modal button {
+  position: relative !important;
+  z-index: 10000 !important;
+  pointer-events: auto !important;
+}
+
+/* Onboarding Button Styles - Ensure visibility */
+.onboarding-next-btn {
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  color: white !important;
+  font-weight: 600;
+  border: 2px solid #1d4ed8;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease-in-out;
+}
+
+.onboarding-next-btn:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #6d28d9 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.onboarding-next-btn:focus {
+  outline: none;
+  ring: 2px;
+  ring-color: #3b82f6;
+  ring-offset: 2px;
+}
+
+/* Ensure text is always white and visible */
+.onboarding-next-btn span,
+.onboarding-next-btn svg {
+  color: white !important;
+  fill: white !important;
+}
+
+/* Custom color variables for consistency */
+:root {
+  --color-white: #FFFFFF;
+  --color-light-grey: #F9FAFB;
+  --color-dark-grey: #1F2937;
+  --color-grey: #6B7280;
+  --color-blue: #2563EB;
+  --color-green: #10B981;
+  --color-red: #DC2626;
+  --color-yellow: #FACC15;
+}
+
+/* Base styles */
+body {
+  background-color: var(--color-white);
+  color: var(--color-dark-grey);
+}
+
+/* Custom utility classes */
+.text-primary {
+  color: var(--color-dark-grey);
+}
+
+.text-secondary {
+  color: var(--color-grey);
+}
+
+.bg-primary {
+  background-color: var(--color-white);
+}
+
+.bg-secondary {
+  background-color: var(--color-light-grey);
+}
+
+.btn-primary {
+  background-color: var(--color-blue);
+  color: var(--color-white);
+}
+
+.btn-primary:hover {
+  background-color: #1d4ed8;
+}
+
+.btn-success {
+  background-color: var(--color-green);
+  color: var(--color-white);
+}
+
+.btn-danger {
+  background-color: var(--color-red);
+  color: var(--color-white);
+}
+
+.badge-sale {
+  background-color: var(--color-yellow);
+  color: var(--color-dark-grey);
+}
+
+/* Animated Delete Button Styles */
+.animated-delete-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: rgb(20, 20, 20);
+  border: none;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0px 0px 6px rgba(0,0,0,0.10);
+  cursor: pointer;
+  transition: width 0.3s, background 0.3s, border-radius 0.3s;
+  overflow: hidden;
+  position: relative;
+  margin-left: 8px;
+  margin-top: 0;
+  margin-bottom: 0;
+  vertical-align: middle;
+  padding: 0;
+}
+
+.animated-delete-btn .svgIcon {
+  width: 10px;
+  height: 10px;
+  transition: width 0.3s, height 0.3s, transform 0.3s;
+  display: block;
+  margin: 0;
+}
+
+.animated-delete-btn .svgIcon path {
+  fill: white;
+}
+
+.animated-delete-btn:hover {
+  width: 48px;
+  border-radius: 14px;
+  background-color: rgb(255, 69, 69);
+}
+
+.animated-delete-btn:hover .svgIcon {
+  width: 16px;
+  height: 16px;
+  transform: translateY(0);
+}
+
+.animated-delete-btn::after {
+  content: "";
+  color: white;
+  font-size: 11px;
+  font-weight: 400;
+  opacity: 0;
+  position: absolute;
+  left: 26px;
+  top: 60%;
+  transform: translateY(-40%);
+  transition: opacity 0.3s, left 0.3s, top 0.3s, transform 0.3s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.animated-delete-btn:hover::after {
+  opacity: 1;
+  left: 26px;
+}
+
+/* Dashboard Animations */
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(30px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0px); 
+  }
+  50% { 
+    transform: translateY(-10px); 
+  }
+}
+
+/* Global Animations for all pages */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInModal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideUpModal {
+  from { opacity: 0; transform: translateY(60px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes bounceIn {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  60% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+
+.animate-fadeIn { animation: fadeIn 0.6s ease-out; }
+.animate-slideUp { animation: slideUp 0.6s ease-out forwards; opacity: 0; }
+.animate-fadeInModal { animation: fadeInModal 0.4s ease; }
+.animate-slideUpModal { animation: slideUpModal 0.5s cubic-bezier(0.23, 1, 0.32, 1); }
+.animate-bounceIn { animation: bounceIn 0.5s cubic-bezier(0.23, 1, 0.32, 1); }
+.animate-float { animation: float 3s ease-in-out infinite; }
+
+.hover\:shadow-3xl:hover {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
