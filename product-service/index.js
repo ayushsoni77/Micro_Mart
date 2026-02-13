@@ -1,11 +1,17 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import productRoutes from './routes/products.js';
 import { connectDatabase } from './config/database.js';
 
+// Get current directory for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Load environment variables
-dotenv.config({ path: './config.env' });
+dotenv.config({ path: path.join(__dirname, './config.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3002;

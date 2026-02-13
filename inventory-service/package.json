@@ -7,8 +7,6 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "init-db": "node scripts/init-db.js",
-    "sync-inventory": "node scripts/sync-inventory.js",
-    "create-inventory-manual": "node scripts/create-inventory-manual.js",
     "test-db": "node test-db.js"
   },
   "dependencies": {

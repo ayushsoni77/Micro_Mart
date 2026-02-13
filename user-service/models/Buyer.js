@@ -1,6 +1,5 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
-import bcrypt from 'bcryptjs';
 
 const Buyer = sequelize.define('Buyer', {
   id: {
@@ -17,48 +16,8 @@ const Buyer = sequelize.define('Buyer', {
       key: 'id'
     }
   },
-  // Identity fields (email/password) are stored in `users` table. Buyer stores profile/extension data.
-  isEmailVerified: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-    defaultValue: false
-  },
-  emailVerificationToken: {
-    type: DataTypes.STRING(255),
-    allowNull: true
-  },
-  emailVerificationExpiry: {
-    type: DataTypes.DATE,
-    allowNull: true
-  },
-  resetPasswordToken: {
-    type: DataTypes.STRING(255),
-    allowNull: true
-  },
-  resetPasswordExpiry: {
-    type: DataTypes.DATE,
-    allowNull: true
-  },
-  profile: {
-    type: DataTypes.JSONB,
-    allowNull: true,
-    defaultValue: {}
-  },
-  oauth_providers: {
-    type: DataTypes.JSONB,
-    allowNull: true,
-    defaultValue: []
-  },
-  lastLoginAt: {
-    type: DataTypes.DATE,
-    allowNull: true
-  },
-  isActive: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-    defaultValue: true
-  },
-  // Buyer-specific fields
+  // Buyer-specific fields only
+  // Identity/authentication fields (email, password, isEmailVerified, etc.) are stored in canonical `users` table
   defaultShippingAddress: {
     type: DataTypes.JSONB,
     allowNull: true
@@ -67,20 +26,19 @@ const Buyer = sequelize.define('Buyer', {
     type: DataTypes.JSONB,
     allowNull: true,
     defaultValue: {}
+  },
+  loyaltyPoints: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
+  },
+  totalSpent: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+    defaultValue: 0.00
   }
 }, {
   tableName: 'buyers'
 });
-
-// Instance method to compare password
-Buyer.prototype.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
-};
-
-// Instance method to get public profile
-Buyer.prototype.getPublicProfile = function() {
-  const { password, emailVerificationToken, resetPasswordToken, ...publicProfile } = this.toJSON();
-  return publicProfile;
-};
 
 export default Buyer; 

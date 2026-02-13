@@ -62,18 +62,18 @@ export const tokenSecurityCheck = async (req, res, next) => {
     // Check for suspicious patterns
     const validation = await TokenService.validateToken(token);
     
-    if (validation.valid) {
+    if (validation.valid && validation.tokenRecord) {
       // Log suspicious activity
       const userAgent = req.headers['user-agent'];
       const ipAddress = req.ip || req.connection.remoteAddress;
       
       // Check for unusual patterns
-      if (validation.tokenRecord.userAgent !== userAgent) {
+      if (validation.tokenRecord.userAgent && validation.tokenRecord.userAgent !== userAgent) {
         console.warn(`⚠️ Suspicious token usage: User agent mismatch for user ${validation.user.id}`);
         // Could trigger additional verification here
       }
       
-      if (validation.tokenRecord.ipAddress !== ipAddress) {
+      if (validation.tokenRecord.ipAddress && validation.tokenRecord.ipAddress !== ipAddress) {
         console.warn(`⚠️ Suspicious token usage: IP address mismatch for user ${validation.user.id}`);
         // Could trigger additional verification here
       }

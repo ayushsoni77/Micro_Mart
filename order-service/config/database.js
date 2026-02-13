@@ -1,8 +1,14 @@
 import { Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Load environment variables
-dotenv.config({ path: './config.env' });
+// Get current directory for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load environment variables from config.env in parent directory
+dotenv.config({ path: path.join(__dirname, '../config.env') });
 
 const sequelize = new Sequelize(
   process.env.DB_NAME || 'ordermart_db',

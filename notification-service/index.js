@@ -1,13 +1,19 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import notificationRoutes from './routes/notifications.js';
 import { connectDatabase } from './config/database.js';
 import { Kafka } from 'kafkajs';
 import { Notification } from './models/index.js';
 
-// Load environment variables
-dotenv.config({ path: './config.env' });
+// Get current directory for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load environment variables from config.env
+dotenv.config({ path: path.join(__dirname, './config.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3004;
@@ -17,6 +23,13 @@ const kafkaClientId = process.env.KAFKA_CLIENT_ID || 'notification-service';
 const kafkaBrokers = (process.env.KAFKA_BROKERS || 'localhost:9092').split(',');
 const kafkaGroupId = process.env.KAFKA_GROUP_ID || 'notification-service-group';
 const orderEventsTopic = process.env.KAFKA_TOPIC_ORDER_EVENTS || 'order-events';
+
+// Debug logging
+console.log(`🔍 Loaded environment variables:`);
+console.log(`   KAFKA_BROKERS: ${process.env.KAFKA_BROKERS}`);
+console.log(`   Parsed kafkaBrokers: ${kafkaBrokers.join(',')}`);
+console.log(`   KAFKA_CLIENT_ID: ${kafkaClientId}`);
+
 let kafkaConsumer;
 
 async function ensureTopicExists(kafka) {
@@ -45,7 +58,14 @@ async function ensureTopicExists(kafka) {
 }
 
 async function initializeKafkaConsumer() {
+  console.log(`\n🔍 Kafka initialization debug:`);
+  console.log(`   kafkaClientId: ${kafkaClientId}`);
+  console.log(`   kafkaBrokers array: ${JSON.stringify(kafkaBrokers)}`);
+  console.log(`   kafkaGroupId: ${kafkaGroupId}`);
+  
   const kafka = new Kafka({ clientId: kafkaClientId, brokers: kafkaBrokers });
+  console.log(`   ✅ Kafka instance created`);
+  
   await ensureTopicExists(kafka);
   kafkaConsumer = kafka.consumer({ groupId: kafkaGroupId, allowAutoTopicCreation: false });
   await kafkaConsumer.connect();

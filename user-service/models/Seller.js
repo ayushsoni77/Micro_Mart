@@ -1,6 +1,5 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
-import bcrypt from 'bcryptjs';
 
 const Seller = sequelize.define('Seller', {
   id: {
@@ -17,48 +16,8 @@ const Seller = sequelize.define('Seller', {
       key: 'id'
     }
   },
-  // Identity fields (email/password) are stored in `users` table. Seller stores profile/extension data.
-  isEmailVerified: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-    defaultValue: false
-  },
-  emailVerificationToken: {
-    type: DataTypes.STRING(255),
-    allowNull: true
-  },
-  emailVerificationExpiry: {
-    type: DataTypes.DATE,
-    allowNull: true
-  },
-  resetPasswordToken: {
-    type: DataTypes.STRING(255),
-    allowNull: true
-  },
-  resetPasswordExpiry: {
-    type: DataTypes.DATE,
-    allowNull: true
-  },
-  profile: {
-    type: DataTypes.JSONB,
-    allowNull: true,
-    defaultValue: {}
-  },
-  oauth_providers: {
-    type: DataTypes.JSONB,
-    allowNull: true,
-    defaultValue: []
-  },
-  lastLoginAt: {
-    type: DataTypes.DATE,
-    allowNull: true
-  },
-  isActive: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-    defaultValue: true
-  },
-  // Seller-specific fields
+  // Seller-specific fields only
+  // Identity/authentication fields (email, password, isEmailVerified, etc.) are stored in canonical `users` table
   businessName: {
     type: DataTypes.STRING(255),
     allowNull: true
@@ -106,20 +65,23 @@ const Seller = sequelize.define('Seller', {
     type: DataTypes.JSONB,
     allowNull: true,
     defaultValue: {}
+  },
+  totalRevenue: {
+    type: DataTypes.DECIMAL(12, 2),
+    allowNull: false,
+    defaultValue: 0.00
+  },
+  rating: {
+    type: DataTypes.DECIMAL(3, 2),
+    allowNull: true
+  },
+  totalProducts: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
   }
 }, {
   tableName: 'sellers'
 });
-
-// Instance method to compare password
-Seller.prototype.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
-};
-
-// Instance method to get public profile
-Seller.prototype.getPublicProfile = function() {
-  const { password, emailVerificationToken, resetPasswordToken, bankAccountInfo, ...publicProfile } = this.toJSON();
-  return publicProfile;
-};
 
 export default Seller; 

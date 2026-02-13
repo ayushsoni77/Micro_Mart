@@ -1,8 +1,13 @@
 import { Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load environment variables
-dotenv.config({ path: './config.env' });
+dotenv.config({ path: path.join(__dirname, '../config.env') });
 
 const sequelize = new Sequelize(
   process.env.DB_NAME || 'paymentmart_db',

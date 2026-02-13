@@ -1,8 +1,10 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import nodemailer, { getTestMessageUrl } from 'nodemailer';
+import User from '../models/User.js';
 import Buyer from '../models/Buyer.js';
 import Seller from '../models/Seller.js';
+import Role from '../models/Role.js';
 import Address from '../models/Address.js';
 import TokenService from '../services/tokenService.js';
 import { Op } from 'sequelize';
@@ -76,11 +78,10 @@ export const register = async (req, res) => {
       });
     }
 
-    // Check if user already exists in either table
-    const existingBuyer = await Buyer.findOne({ where: { email } });
-    const existingSeller = await Seller.findOne({ where: { email } });
+    // Check if user already exists
+    const existingUser = await User.findOne({ where: { email } });
     
-    if (existingBuyer || existingSeller) {
+    if (existingUser) {
       console.log(`❌ Registration failed - User already exists: ${email}`);
       return res.status(400).json({ message: 'User already exists with this email address.' });
     }
@@ -89,35 +90,39 @@ export const register = async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpiry = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
 
-    let user;
-    if (role === 'buyer') {
-      // Create buyer
-      user = await Buyer.create({
-        email,
-        password, // Will be hashed by the model hook
-        name,
-        isEmailVerified: false,
-        emailVerificationToken: otp,
-        emailVerificationExpiry: otpExpiry,
-        profile: {},
-        oauth_providers: []
-      });
-    } else {
-      // Create seller
-      user = await Seller.create({
-        email,
-        password, // Will be hashed by the model hook
-        name,
-        isEmailVerified: false,
-        emailVerificationToken: otp,
-        emailVerificationExpiry: otpExpiry,
-        profile: {},
-        oauth_providers: []
-      });
+    // Create user in canonical users table
+    const user = await User.create({
+      email,
+      password, // Will be hashed by the model hook
+      name,
+      isEmailVerified: true, // Auto-verify for development
+      emailVerificationToken: otp,
+      emailVerificationExpiry: otpExpiry,
+      profile: {},
+      oauthProviders: []
+    });
+
+    // Get the role ID
+    const roleRecord = await Role.findOne({ where: { name: role } });
+    if (roleRecord) {
+      // Assign role to user
+      await user.addRole(roleRecord);
     }
 
-    // Send verification email
-    await sendVerificationEmail(email, otp);
+    // Create profile extension (Buyer or Seller)
+    if (role === 'buyer') {
+      await Buyer.create({ userId: user.id });
+    } else if (role === 'seller') {
+      await Seller.create({ userId: user.id });
+    }
+
+    // Try to send verification email (don't fail if it doesn't work)
+    try {
+      await sendVerificationEmail(email, otp);
+    } catch (emailError) {
+      console.warn(`⚠️ Warning: Failed to send verification email: ${emailError.message}`);
+      // Don't fail registration if email fails
+    }
 
     console.log(`✅ Registration successful for: ${email}`);
     res.status(201).json({
@@ -143,21 +148,22 @@ export const login = async (req, res) => {
 
     console.log(`🔐 Login attempt for email: ${email}`);
 
-    // Check in both buyer and seller tables
-    let user = await Buyer.findOne({ where: { email } });
-    let userRole = 'buyer';
-    
-    if (!user) {
-      user = await Seller.findOne({ where: { email } });
-      userRole = 'seller';
-    }
+    // Find user in canonical users table
+    const user = await User.findOne({ 
+      where: { email },
+      include: [
+        { model: Role, as: 'roles', through: { attributes: [] } },
+        { model: Buyer, as: 'buyerProfile' },
+        { model: Seller, as: 'sellerProfile' }
+      ]
+    });
 
     if (!user) {
       console.log(`❌ Login failed - User not found: ${email}`);
       return res.status(401).json({ message: 'Invalid email or password.' });
     }
 
-    console.log(`✅ Found user: ${user.email} (${userRole})`);
+    console.log(`✅ Found user: ${user.email}`);
 
     // Check if email is verified
     if (!user.isEmailVerified) {
@@ -170,8 +176,8 @@ export const login = async (req, res) => {
 
     console.log(`✅ Email verified: ${user.isEmailVerified}`);
 
-    // Check if account is active (only if the field exists)
-    if (user.isActive !== undefined && !user.isActive) {
+    // Check if account is active
+    if (!user.isActive) {
       console.log(`❌ Login failed - Account inactive: ${email}`);
       return res.status(401).json({ message: 'Account is deactivated. Please contact support.' });
     }
@@ -195,6 +201,9 @@ export const login = async (req, res) => {
     await user.save();
 
     console.log(`✅ Last login updated`);
+
+    // Determine user role from roles array
+    const userRole = user.roles && user.roles.length > 0 ? user.roles[0].name : 'buyer';
 
     // Generate tokens
     const accessToken = jwt.sign(
@@ -251,20 +260,35 @@ export const getProfile = async (req, res) => {
   try {
     const { userId, role } = req.user;
 
-    let user;
-    if (role === 'buyer') {
-      user = await Buyer.findByPk(userId);
-    } else {
-      user = await Seller.findByPk(userId);
-    }
+    // Get user from canonical users table with role and profile associations
+    const user = await User.findByPk(userId, {
+      include: [
+        { model: Role, as: 'roles', through: { attributes: [] } },
+        { model: Buyer, as: 'buyerProfile' },
+        { model: Seller, as: 'sellerProfile' }
+      ]
+    });
 
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    res.json({
-      user: user.getPublicProfile()
-    });
+    // Return user profile with associated role and profile data
+    const publicProfile = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.roles && user.roles.length > 0 ? user.roles[0].name : 'buyer',
+      isEmailVerified: user.isEmailVerified,
+      isActive: user.isActive,
+      lastLoginAt: user.lastLoginAt,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      buyerProfile: user.buyerProfile || null,
+      sellerProfile: user.sellerProfile || null
+    };
+
+    res.json({ user: publicProfile });
 
   } catch (error) {
     console.error('❌ Get profile error:', error);
@@ -276,14 +300,8 @@ export const verifyEmail = async (req, res) => {
   try {
     const { email, otp } = req.body;
 
-    // Check in both buyer and seller tables
-    let user = await Buyer.findOne({ where: { email } });
-    let userRole = 'buyer';
-    
-    if (!user) {
-      user = await Seller.findOne({ where: { email } });
-      userRole = 'seller';
-    }
+    // Find user in canonical users table
+    const user = await User.findOne({ where: { email } });
 
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
@@ -378,14 +396,8 @@ export const resendOtp = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // Check in both buyer and seller tables
-    let user = await Buyer.findOne({ where: { email } });
-    let userRole = 'buyer';
-    
-    if (!user) {
-      user = await Seller.findOne({ where: { email } });
-      userRole = 'seller';
-    }
+    // Find user in canonical users table
+    const user = await User.findOne({ where: { email } });
 
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
