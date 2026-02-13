@@ -1,0 +1,53 @@
+%% Service dependency diagram (sync vs async)
+flowchart LR
+  Web[Frontend (src)]
+  API[API Gateway / BFF]
+  Order[Order Service]
+  Product[Product Service]
+  Inventory[Inventory Service]
+  Payment[Payment Service]
+  Notification[Notification Service]
+  Reviews[Reviews Service]
+  Cart[Cart Service]
+  User[User Service]
+
+  Web -->|HTTP (sync)| API
+  API -->|HTTP (sync)| Order
+  API -->|HTTP (sync)| Product
+  API -->|HTTP (sync)| Cart
+  API -->|HTTP (sync)| User
+  API -->|HTTP (sync)| Payment
+  API -->|HTTP (sync)| Reviews
+
+  Order -->|HTTP (sync): validate product| Product
+  Order -->|HTTP (sync): reserve stock| Inventory
+  Order -.->|Kafka (async): OrderCreated / OrderStatusUpdated| Notification
+
+  Payment -->|HTTP (sync): fetch/update order| Order
+  Payment -->|HTTP (sync): notify (current)| Notification
+  Payment -.->|Kafka (recommended async for notifications)| Notification
+
+  Product -->|HTTP (sync): stock check / update| Inventory
+  Reviews -->|HTTP (sync): verify product & purchase| Product
+  Reviews -->|HTTP (sync): verify order| Order
+
+  Inventory -->|HTTP (sync) (scripts/enrichment)| Product
+
+  Many services -->|HTTP (sync): auth/token| User
+
+%% ASCII fallback (for quick reference)
+%% Frontend
+%%   |
+%%   v (HTTP sync)
+%% API Gateway/BFF
+%%   |- Order Service
+%%   |    |- (HTTP sync) -> Product Service
+%%   |    |- (HTTP sync) -> Inventory Service
+%%   |    `- (Kafka async) -> Notification Service
+%%   |
+%%   |- Product Service -> (HTTP sync) Inventory Service
+%%   |- Payment Service -> (HTTP sync) Order Service -> (HTTP sync) Notification Service (currently)
+%%   |                 `- (recommended) -> Kafka async -> Notification Service
+%%   |- Reviews Service -> (HTTP sync) Product Service & Order Service
+%%   |- Cart Service -> (HTTP sync) (frontend)
+%%   `- User Service -> (HTTP sync) (auth used by many services)

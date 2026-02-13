@@ -10,8 +10,11 @@ const Token = sequelize.define('Token', {
   },
   userId: {
     type: DataTypes.INTEGER,
-    allowNull: false
-    // Removed foreign key constraint to allow flexibility with buyers/sellers tables
+    allowNull: false,
+    references: {
+      model: 'users',
+      key: 'id'
+    }
   },
   token: {
     type: DataTypes.TEXT,

@@ -25,9 +25,10 @@ const User = sequelize.define('User', {
     allowNull: false
   },
   role: {
-    type: DataTypes.ENUM('buyer', 'seller'),
-    allowNull: false,
-    defaultValue: 'buyer'
+    // Roles are managed in a separate `roles` and `user_roles` tables.
+    // Keep a virtual placeholder for backward compatibility in code that expects `role`.
+    type: DataTypes.VIRTUAL,
+    get() { return null; }
   },
   isEmailVerified: {
     type: DataTypes.BOOLEAN,

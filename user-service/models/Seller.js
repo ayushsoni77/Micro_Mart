@@ -8,22 +8,16 @@ const Seller = sequelize.define('Seller', {
     primaryKey: true,
     autoIncrement: true
   },
-  email: {
-    type: DataTypes.STRING(255),
+  userId: {
+    type: DataTypes.INTEGER,
     allowNull: false,
     unique: true,
-    validate: {
-      isEmail: true
+    references: {
+      model: 'users',
+      key: 'id'
     }
   },
-  password: {
-    type: DataTypes.STRING(255),
-    allowNull: false
-  },
-  name: {
-    type: DataTypes.STRING(255),
-    allowNull: false
-  },
+  // Identity fields (email/password) are stored in `users` table. Seller stores profile/extension data.
   isEmailVerified: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
@@ -114,19 +108,7 @@ const Seller = sequelize.define('Seller', {
     defaultValue: {}
   }
 }, {
-  tableName: 'sellers',
-  hooks: {
-    beforeCreate: async (seller) => {
-      if (seller.password) {
-        seller.password = await bcrypt.hash(seller.password, 12);
-      }
-    },
-    beforeUpdate: async (seller) => {
-      if (seller.changed('password')) {
-        seller.password = await bcrypt.hash(seller.password, 12);
-      }
-    }
-  }
+  tableName: 'sellers'
 });
 
 // Instance method to compare password
