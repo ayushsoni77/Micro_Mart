@@ -21,8 +21,7 @@ import {
 import axios from 'axios';
 import { motion } from 'framer-motion';
 
-const PRODUCT_API_URL = import.meta.env.VITE_PRODUCT_API_URL || 'http://localhost:3002';
-const REVIEWS_API_URL = import.meta.env.VITE_REVIEWS_API_URL || 'http://localhost:3006';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 
 interface Product {
   id?: number;
@@ -85,7 +84,7 @@ const ProductDetail = () => {
   const fetchProductDetails = async () => {
     setLoading(true);
       try {
-        const response = await axios.get(`${PRODUCT_API_URL}/api/products/${id}`);
+        const response = await axios.get(`${API_BASE_URL}/products/${id}`);
         setProduct(response.data);
     } catch (error) {
       console.error('Error fetching product details:', error);
@@ -97,7 +96,7 @@ const ProductDetail = () => {
 
   const fetchReviews = async () => {
     try {
-      const response = await axios.get(`${REVIEWS_API_URL}/api/reviews/product/${id}`);
+      const response = await axios.get(`${API_BASE_URL}/reviews/product/${id}`);
       setReviews(response.data.reviews);
     } catch (error) {
       console.error('Error fetching reviews:', error);
@@ -133,7 +132,7 @@ const ProductDetail = () => {
     if (!user || !product) return;
     try {
       const response = await axios.post(
-        `${REVIEWS_API_URL}/api/reviews/`,
+        `${API_BASE_URL}/reviews/`,
         {
           productId: product._id || product.id,
       rating: newReview.rating,
@@ -166,7 +165,7 @@ const ProductDetail = () => {
     setVotingReview(reviewId);
     try {
       const response = await axios.patch(
-        `${REVIEWS_API_URL}/api/reviews/${reviewId}/helpful`,
+        `${API_BASE_URL}/reviews/${reviewId}/helpful`,
         { helpful: isHelpful }
       );
       setReviews(
