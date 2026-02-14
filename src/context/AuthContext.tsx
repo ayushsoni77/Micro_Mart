@@ -20,6 +20,8 @@ interface AuthContextType {
   refreshToken: () => Promise<void>;
 }
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
@@ -77,7 +79,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setIsRefreshing(true);
 
           try {
-            const response = await axios.post('http://localhost:3001/api/users/refresh-token', {
+            const response = await axios.post(`${API_BASE_URL}/api/users/refresh-token`, {
               refreshToken: refreshToken
             });
 
@@ -122,7 +124,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const fetchUserProfile = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/api/users/profile');
+      const response = await axios.get(`${API_BASE_URL}/api/users/profile`);
       setUser(response.data.user);
     } catch (error: any) {
       console.error('Failed to fetch user profile:', error);
@@ -145,7 +147,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const refreshAccessToken = async () => {
     try {
-      const response = await axios.post('http://localhost:3001/api/users/refresh-token', {
+      const response = await axios.post(`${API_BASE_URL}/api/users/refresh-token`, {
         refreshToken: refreshToken
       });
 
@@ -163,7 +165,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await axios.post('http://localhost:3001/api/users/login', {
+      const response = await axios.post(`${API_BASE_URL}/api/users/login`, {
         email,
         password,
       });
@@ -191,7 +193,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (email: string, password: string, name: string, role: string = 'buyer') => {
     try {
-      const response = await axios.post('http://localhost:3001/api/users/register', {
+      const response = await axios.post(`${API_BASE_URL}/api/users/register`, {
         email,
         password,
         name,
