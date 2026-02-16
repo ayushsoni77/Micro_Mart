@@ -14,7 +14,7 @@
     "@opentelemetry/auto-instrumentations-node": "^0.57.0",
     "@opentelemetry/exporter-trace-otlp-http": "^0.57.0",
     "@opentelemetry/sdk-node": "^0.57.0",
-    "@pyroscope/nodejs": "^0.14.0",
+    "@pyroscope/nodejs": "^0.4.10",
     "axios": "^1.6.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
