@@ -11,9 +11,11 @@ import authRoutes from './routes/auth.js';
 import { testConnection, syncDatabase } from './config/database.js';
 import models from './models/index.js'; // Ensure models are loaded for sync
 import TokenService from './services/tokenService.js';
+import { initializeObservability } from './observability.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const observability = await initializeObservability({ serviceName: 'user-service' });
 
 // Initialize database
 const initializeDatabase = async () => {
@@ -44,6 +46,7 @@ if (process.env.NODE_ENV !== 'test') {
 // Middleware
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
+app.use(observability.metricsMiddleware);
 if (process.env.NODE_ENV !== 'test') {
   app.use(session({
     store: new RedisStore({ client: redisClient }),
@@ -66,6 +69,8 @@ app.use('/auth', authRoutes); // OAuth endpoints
 app.get('/health', (req, res) => {
   res.json({ status: 'User Service is running', timestamp: new Date().toISOString() });
 });
+
+observability.registerMetricsEndpoint(app);
 
 // Periodic cleanup of expired tokens (every hour)
 const cleanupExpiredTokens = async () => {
@@ -97,3 +102,10 @@ if (process.env.NODE_ENV !== 'test') {
 
 // Export the app for testing
 export default app;
+const shutdown = async () => {
+  await observability.shutdown();
+  process.exit(0);
+};
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);

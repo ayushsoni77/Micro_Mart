@@ -7,6 +7,7 @@ import notificationRoutes from './routes/notifications.js';
 import { connectDatabase } from './config/database.js';
 import { Kafka } from 'kafkajs';
 import { Notification } from './models/index.js';
+import { initializeObservability } from './observability.js';
 
 // Get current directory for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -17,6 +18,7 @@ dotenv.config({ path: path.join(__dirname, './config.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3004;
+const observability = await initializeObservability({ serviceName: 'notification-service' });
 
 // Kafka (KRaft) setup
 const kafkaClientId = process.env.KAFKA_CLIENT_ID || 'notification-service';
@@ -132,6 +134,7 @@ const initializeDatabase = async () => {
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(observability.metricsMiddleware);
 
 // Routes
 app.use('/api/notifications', notificationRoutes);
@@ -140,6 +143,8 @@ app.use('/api/notifications', notificationRoutes);
 app.get('/health', (req, res) => {
   res.json({ status: 'Notification Service is running', timestamp: new Date().toISOString() });
 });
+
+observability.registerMetricsEndpoint(app);
 
 // Initialize database, Kafka and start server
 (async () => {
@@ -150,6 +155,7 @@ app.get('/health', (req, res) => {
   });
 
   const shutdown = async () => {
+    await observability.shutdown();
     console.log('🔻 Shutting down Notification Service...');
     try {
       if (kafkaConsumer) await kafkaConsumer.disconnect();

@@ -12,9 +12,14 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@opentelemetry/auto-instrumentations-node": "^0.57.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.57.0",
+    "@opentelemetry/sdk-node": "^0.57.0",
+    "@pyroscope/nodejs": "^0.14.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^4.18.2",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "prom-client": "^15.1.3"
   }
 }

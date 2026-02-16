@@ -51,6 +51,14 @@ services:
   frontend:
     container_name: frontend
     image: ayushsoni7777/micro-mart:frontend
+    environment:
+      - VITE_USER_SERVICE_URL=http://user-service:3001
+      - VITE_PRODUCT_SERVICE_URL=http://product-service:3002
+      - VITE_ORDER_SERVICE_URL=http://order-service:3003
+      - VITE_PAYMENT_SERVICE_URL=http://payment-service:3004
+      - VITE_INVENTORY_SERVICE_URL=http://inventory-service:3005
+      - VITE_REVIEWS_SERVICE_URL=http://reviews-service:3006
+      - VITE_NOTIFICATION_SERVICE_URL=http://notification-service:3007
     ports:
       - "80:80"
     networks:

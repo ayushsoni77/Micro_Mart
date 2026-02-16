@@ -7,6 +7,7 @@ import orderRoutes from './routes/orders.js';
 import { testConnection, syncDatabase } from './config/database.js';
 import models from './models/index.js'; // Ensure models are loaded for sync
 import { Kafka } from 'kafkajs';
+import { initializeObservability } from './observability.js';
 
 // Get current directory for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -17,6 +18,7 @@ dotenv.config({ path: path.join(__dirname, './config.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3003;
+const observability = await initializeObservability({ serviceName: 'order-service' });
 
 // Kafka setup
 const kafkaClientId = process.env.KAFKA_CLIENT_ID || 'order-service';
@@ -84,6 +86,7 @@ const initializeDatabase = async () => {
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(observability.metricsMiddleware);
 
 // Routes
 app.use('/api/orders', orderRoutes);
@@ -92,6 +95,8 @@ app.use('/api/orders', orderRoutes);
 app.get('/health', (req, res) => {
   res.json({ status: 'Order Service is running', timestamp: new Date().toISOString() });
 });
+
+observability.registerMetricsEndpoint(app);
 
 // Initialize database, Kafka and start server
 (async () => {
@@ -103,6 +108,7 @@ app.get('/health', (req, res) => {
 
   // Graceful shutdown
   const shutdown = async () => {
+    await observability.shutdown();
     console.log('🔻 Shutting down Order Service...');
     try {
       if (kafkaProducer) await kafkaProducer.disconnect();
