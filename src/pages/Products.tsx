@@ -4,7 +4,8 @@ import { useCart } from '../context/CartContext';
 import { ShoppingCart, Search, Filter, Star, Plus } from 'lucide-react';
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+const PRODUCT_SERVICE_URL = import.meta.env.VITE_PRODUCT_SERVICE_URL || 'http://localhost:3002';
+const REVIEWS_SERVICE_URL = import.meta.env.VITE_REVIEWS_SERVICE_URL || 'http://localhost:3006';
 
 interface Product {
   id?: number;
@@ -45,14 +46,14 @@ const Products = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/products`);
+      const response = await axios.get(`${PRODUCT_SERVICE_URL}/api/products`);
       const productsData = response.data; // MongoDB returns array directly
       
       // Fetch review stats for each product
       const productsWithReviews = await Promise.all(
         productsData.map(async (product: Product) => {
           try {
-            const reviewResponse = await axios.get(`${API_BASE_URL}/reviews/product/${product._id || product.id}/stats`);
+            const reviewResponse = await axios.get(`${REVIEWS_SERVICE_URL}/api/reviews/product/${product._id || product.id}/stats`);
             return {
               ...product,
               reviewStats: reviewResponse.data.stats

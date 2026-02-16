@@ -20,7 +20,7 @@ interface AuthContextType {
   refreshToken: () => Promise<void>;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+const API_BASE_URL = import.meta.env.VITE_USER_SERVICE_URL || 'http://localhost:3001';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
