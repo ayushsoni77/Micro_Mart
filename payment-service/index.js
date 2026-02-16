@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import paymentRoutes from './routes/paymentRoutes.js';
 import { testConnection, syncDatabase } from './config/database.js';
 import models from './models/index.js'; // Ensure models are loaded for sync
+import { initializeObservability } from './observability.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,6 +16,7 @@ dotenv.config({ path: path.join(__dirname, './config.env') });
 
 const app = express();
 const PORT = process.env.PORT || 4004;
+const observability = await initializeObservability({ serviceName: 'payment-service' });
 
 // Initialize database
 const initializeDatabase = async () => {
@@ -35,6 +37,7 @@ const initializeDatabase = async () => {
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(observability.metricsMiddleware);
 
 // Routes
 app.use('/payment', paymentRoutes);
@@ -44,9 +47,18 @@ app.get('/health', (req, res) => {
   res.json({ status: 'Payment Service is running', timestamp: new Date().toISOString() });
 });
 
+observability.registerMetricsEndpoint(app);
+
 // Initialize database and start server
 initializeDatabase().then(() => {
   app.listen(PORT, () => {
     console.log(`💳 Payment Service running on port ${PORT}`);
   });
 });
+const shutdown = async () => {
+  await observability.shutdown();
+  process.exit(0);
+};
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
