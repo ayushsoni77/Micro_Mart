@@ -78,10 +78,8 @@ services:
   product-service:
     container_name: product-service
     image: ayushsoni7777/micro_mart:product-service
-    environment:
-      - MONGODB_URI=mongodb://mongodb:27017/productmart_db
-      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
-      - INVENTORY_SERVICE_URL=http://inventory-service:3005/api/inventory
+    env_file:
+      - ./product-service/config.env
     ports:
       - "3002:3002" 
     networks:
