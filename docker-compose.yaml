@@ -1,7 +1,7 @@
 services:
 
   postgres:
-    image: dhi.io/postgres:18-alpine3.22-dev
+    image: postgres:18-alpine
     container_name: postgres
     environment:
       POSTGRES_USER: root
@@ -10,7 +10,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data  
+      - postgres_data:/var/lib/postgresql/data 
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql 
     networks:
       - default
 
@@ -50,7 +51,7 @@ services:
     
   frontend:
     container_name: frontend
-    image: ayushsoni7777/micro-mart:frontend
+    image: ayushsoni7777/micro_mart:frontend
     environment:
       - VITE_USER_SERVICE_URL=http://user-service:3001
       - VITE_PRODUCT_SERVICE_URL=http://product-service:3002
@@ -66,9 +67,9 @@ services:
 
   user-service:
     container_name: user-service
-    image: ayushsoni7777/micro-mart:user-service
-    environment:
-      - .env
+    image: ayushsoni7777/micro_mart:user-service
+    env_file:
+      - ./user-service/config.env
     ports:
       - "3001:3001"
     networks:
@@ -76,9 +77,11 @@ services:
 
   product-service:
     container_name: product-service
-    image: ayushsoni7777/micro-mart:product-service
+    image: ayushsoni7777/micro_mart:product-service
     environment:
-      - .env
+      - MONGODB_URI=mongodb://mongodb:27017/productmart_db
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - INVENTORY_SERVICE_URL=http://inventory-service:3005/api/inventory
     ports:
       - "3002:3002" 
     networks:
@@ -86,9 +89,9 @@ services:
 
   order-service:
     container_name: order-service
-    image: ayushsoni7777/micro-mart:order-service
-    environment:
-      - .env    
+    image: ayushsoni7777/micro_mart:order-service
+    env_file:
+      - ./order-service/config.env
     ports:
       - "3003:3003" 
     networks:
@@ -96,9 +99,9 @@ services:
   
   cart-service:
     container_name: cart-service
-    image: ayushsoni7777/micro-mart:cart-service
-    environment:
-      - .env    
+    image: ayushsoni7777/micro_mart:cart-service
+    env_file:
+      - ./cart-service/config.env
     ports:
       - "3004:3004" 
     networks: 
@@ -106,9 +109,9 @@ services:
   
   inventory-service:
     container_name: inventory-service
-    image: ayushsoni7777/micro-mart:inventory-service
-    environment:
-      - .env    
+    image: ayushsoni7777/micro_mart:inventory-service
+    env_file:
+      - ./inventory-service/config.env
     ports:
       - "3005:3005" 
     networks: 
@@ -116,9 +119,9 @@ services:
   
   reviews-service:
     container_name: reviews-service
-    image: ayushsoni7777/micro-mart:reviews-service   
-    environment:
-      - .env
+    image: ayushsoni7777/micro_mart:review-service   
+    env_file:
+      - ./reviews-service/config.env
     ports:
       - "3006:3006" 
     networks: 
@@ -126,12 +129,20 @@ services:
   
   payment-service:
     container_name: payment-service
-    image: ayushsoni7777/micro-mart:payment-service   
-    environment:
-      - .env
+    image: ayushsoni7777/micro_mart:payment-service   
+    env_file:
+      - ./payment-service/config.env
     ports:
       - "3007:3007" 
     networks: 
+      - default
+  
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
       - default
 
 networks:
