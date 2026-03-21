@@ -1,7 +1,7 @@
 import Inventory from '../models/Inventory.js';
 import axios from 'axios';
 
-const PRODUCT_SERVICE_URL = process.env.PRODUCT_SERVICE_URL || 'http://localhost:3002';
+const PRODUCT_SERVICE_URL = process.env.PRODUCT_SERVICE_URL || 'http://product-service:3002/api/products';
 
 // Get inventory for a specific product
 export const getInventory = async (req, res) => {
@@ -49,7 +49,7 @@ export const createOrUpdateInventory = async (req, res) => {
 
     // Verify product exists
     try {
-      const productResponse = await axios.get(`${PRODUCT_SERVICE_URL}/products/${productId}`);
+      const productResponse = await axios.get(`${PRODUCT_SERVICE_URL}/${productId}`);
       if (!productResponse.data) {
         return res.status(404).json({ message: 'Product not found' });
       }

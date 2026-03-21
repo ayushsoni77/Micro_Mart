@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+  namespace: notification-service-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+    spec:
+      containers:
+        - name: notification-service
+          image: ayushsoni7777/micro_mart:notification-service
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3004
+              name: http
+          envFrom:
+            - configMapRef:
+                name: notification-service-config
+            - secretRef:
+                name: notification-service-secret
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3004
+            initialDelaySeconds: 25
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3004
+            initialDelaySeconds: 35
+            periodSeconds: 15

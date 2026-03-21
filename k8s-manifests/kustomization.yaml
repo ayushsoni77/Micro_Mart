@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespaces
+  - postgres
+  - mongo
+  - redis
+  - kafka
+  - user-service
+  - product-service
+  - inventory-service
+  - order-service
+  - notification-service
+  - reviews-service
+  - payment-service
+  - cart-service
+  - frontend

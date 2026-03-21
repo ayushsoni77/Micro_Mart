@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: postgres-ns
+data:
+  POSTGRES_USER: root
+  POSTGRES_DB: Test

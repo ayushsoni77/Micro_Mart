@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payment-service-config
+  namespace: payment-service-ns
+data:
+  DB_HOST: postgres.postgres-ns.svc.cluster.local
+  DB_PORT: "5432"
+  DB_NAME: paymentmart_db
+  DB_USER: root
+  PORT: "4004"
+  NODE_ENV: development
+  ORDER_SERVICE_URL: http://order-service.order-service-ns.svc.cluster.local:3003/api/orders
+  NOTIFICATION_SERVICE_URL: http://notification-service.notification-service-ns.svc.cluster.local:3004

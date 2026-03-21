@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reviews-service
+  namespace: reviews-service-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reviews-service
+  template:
+    metadata:
+      labels:
+        app: reviews-service
+    spec:
+      containers:
+        - name: reviews-service
+          image: ayushsoni7777/micro_mart:review-service
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3006
+              name: http
+          envFrom:
+            - configMapRef:
+                name: reviews-service-config
+            - secretRef:
+                name: reviews-service-secret
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3006
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3006
+            initialDelaySeconds: 30
+            periodSeconds: 15

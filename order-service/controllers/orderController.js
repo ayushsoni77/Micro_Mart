@@ -3,9 +3,9 @@ import { Order, OrderItem, OrderStatus } from '../models/index.js';
 import { Op } from 'sequelize';
 import sequelize from '../models/index.js';
 
-const NOTIFICATION_SERVICE_URL = 'http://localhost:3004';
-const INVENTORY_SERVICE_URL = 'http://localhost:3005';
-const PRODUCT_SERVICE_URL = 'http://localhost:3002';
+const NOTIFICATION_SERVICE_URL = process.env.NOTIFICATION_SERVICE_URL || 'http://notification-service:3004';
+const INVENTORY_SERVICE_URL = process.env.INVENTORY_SERVICE_URL || 'http://inventory-service:3005';
+const PRODUCT_SERVICE_URL = process.env.PRODUCT_SERVICE_URL || 'http://product-service:3002';
 
 export const createOrder = async (req, res) => {
   try {
@@ -520,7 +520,7 @@ export const getSellerAnalytics = async (req, res) => {
     // First, get the seller's products to know which orders to include
     let sellerProductIds = [];
     try {
-      const productsResponse = await axios.get(`http://localhost:3002/api/products/seller/products`, {
+      const productsResponse = await axios.get(`${PRODUCT_SERVICE_URL}/api/products/seller/products`, {
         headers: { 
           'Authorization': req.headers.authorization 
         }
@@ -687,7 +687,7 @@ export const getSellerProductAnalytics = async (req, res) => {
     // First, get the seller's products to filter analytics
     let sellerProductIds = [];
     try {
-      const productsResponse = await axios.get(`http://localhost:3002/api/products/seller/products`, {
+      const productsResponse = await axios.get(`${PRODUCT_SERVICE_URL}/api/products/seller/products`, {
         headers: { 
           'Authorization': req.headers.authorization 
         }

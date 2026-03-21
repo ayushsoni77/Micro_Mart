@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-service-config
+  namespace: user-service-ns
+data:
+  DB_HOST: postgres.postgres-ns.svc.cluster.local
+  DB_PORT: "5432"
+  DB_NAME: usermart_db
+  DB_USER: root
+  REDIS_HOST: redis.redis-ns.svc.cluster.local
+  REDIS_PORT: "6379"
+  PORT: "3001"
+  NODE_ENV: development
+  REDIS_URL: redis://redis.redis-ns.svc.cluster.local:6379

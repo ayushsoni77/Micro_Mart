@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka
+  namespace: kafka-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      hostname: kafka
+      containers:
+        - name: kafka
+          image: apache/kafka:3.9.2-rc1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9092
+              name: kafka
+            - containerPort: 9093
+              name: controller
+          envFrom:
+            - configMapRef:
+                name: kafka-config
+          volumeMounts:
+            - name: kafka-data
+              mountPath: /var/lib/kafka/data
+          readinessProbe:
+            tcpSocket:
+              port: 9092
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 9092
+            initialDelaySeconds: 30
+            periodSeconds: 15
+      volumes:
+        - name: kafka-data
+          persistentVolumeClaim:
+            claimName: kafka-pvc

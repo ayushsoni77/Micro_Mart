@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart-service
+  namespace: cart-service-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cart-service
+  template:
+    metadata:
+      labels:
+        app: cart-service
+    spec:
+      containers:
+        - name: cart-service
+          image: ayushsoni7777/micro_mart:cart-service
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3007
+              name: http
+          envFrom:
+            - configMapRef:
+                name: cart-service-config
+            - secretRef:
+                name: cart-service-secret
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3007
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3007
+            initialDelaySeconds: 25
+            periodSeconds: 15

@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory-service
+  namespace: inventory-service-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inventory-service
+  template:
+    metadata:
+      labels:
+        app: inventory-service
+    spec:
+      containers:
+        - name: inventory-service
+          image: ayushsoni7777/micro_mart:inventory-service
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3005
+              name: http
+          envFrom:
+            - configMapRef:
+                name: inventory-service-config
+            - secretRef:
+                name: inventory-service-secret
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3005
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3005
+            initialDelaySeconds: 30
+            periodSeconds: 15

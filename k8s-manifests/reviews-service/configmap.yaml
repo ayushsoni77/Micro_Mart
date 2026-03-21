@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: reviews-service-config
+  namespace: reviews-service-ns
+data:
+  MONGODB_URI: mongodb://mongodb.mongodb-ns.svc.cluster.local:27017/reviewsmart_db
+  PORT: "3006"
+  NODE_ENV: development
+  ORDER_SERVICE_URL: http://order-service.order-service-ns.svc.cluster.local:3003/api/orders
+  PRODUCT_SERVICE_URL: http://product-service.product-service-ns.svc.cluster.local:3002/api/products

@@ -8,7 +8,7 @@ import PaymentTransaction from '../models/PaymentTransaction.js';
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID;
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
 const ORDER_SERVICE_URL = process.env.ORDER_SERVICE_URL;
-const NOTIFICATION_SERVICE_URL = 'http://localhost:3004';
+const NOTIFICATION_SERVICE_URL = process.env.NOTIFICATION_SERVICE_URL || 'http://notification-service:3004';
 
 const razorpay = new Razorpay({
   key_id: RAZORPAY_KEY_ID,
